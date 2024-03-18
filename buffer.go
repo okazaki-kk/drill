@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"strings"
 )
 
 const MAX_PACKET_SIZE = 512
@@ -136,4 +137,50 @@ func (b *BytePacketBuffer) readQName() (string, error) {
 	}
 
 	return str, nil
+}
+
+// write writes a byte to the buffer
+func (b *BytePacketBuffer) write(val uint8) error {
+	if b.pos >= MAX_PACKET_SIZE {
+		return errors.New("end of buffer")
+	}
+	b.buf[b.pos] = val
+	b.pos++
+	return nil
+}
+
+// write2Byte writes two bytes to the buffer
+func (b *BytePacketBuffer) write2Byte(val uint16) error {
+	err := b.write(uint8(val >> 8))
+	if err != nil {
+		return err
+	}
+	return b.write(uint8(val))
+}
+
+// write4Byte writes four bytes to the buffer
+func (b *BytePacketBuffer) write4Byte(val uint32) error {
+	err := b.write2Byte(uint16(val >> 16))
+	if err != nil {
+		return err
+	}
+	return b.write2Byte(uint16(val))
+}
+
+func (b *BytePacketBuffer) writeQName(qname string) error {
+	labels := strings.Split(qname, ".")
+	for _, label := range labels {
+		len := uint8(len(label))
+		if len > 0x3f {
+			return errors.New("label too long")
+		}
+
+		b.write(len)
+		for _, c := range label {
+			b.write(uint8(c))
+		}
+	}
+
+	b.write(0)
+	return nil
 }

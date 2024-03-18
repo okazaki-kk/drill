@@ -35,3 +35,21 @@ func (d *DnsQuestion) read(buf *BytePacketBuffer) error {
 
 	return nil
 }
+
+func (d *DnsQuestion) write(buf *BytePacketBuffer) error {
+	err := buf.writeQName(d.name)
+	if err != nil {
+		return err
+	}
+
+	err = buf.write2Byte(uint16(d.qtype))
+	if err != nil {
+		return err
+	}
+	err = buf.write2Byte(1) // class
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

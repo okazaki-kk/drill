@@ -41,3 +41,30 @@ func (d *DnsRecord) read(buf *BytePacketBuffer) error {
 
 	return nil
 }
+
+func (d *DnsRecord) write(buf *BytePacketBuffer) (uint, error) {
+	start := buf.position()
+
+	err := buf.writeQName(d.domain)
+	if err != nil {
+		return 0, err
+	}
+	err = buf.write2Byte(uint16(d.qType))
+	if err != nil {
+		return 0, err
+	}
+	err = buf.write2Byte(1) // class
+	if err != nil {
+		return 0, nil
+	}
+	err = buf.write4Byte(d.ttl)
+	if err != nil {
+		return 0, err
+	}
+	err = buf.write2Byte(d.dataSize)
+	if err != nil {
+		return 0, err
+	}
+
+	return buf.position() - start, nil
+}
