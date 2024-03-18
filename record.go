@@ -59,7 +59,7 @@ func (d *DnsRecord) write(buf *BytePacketBuffer) (uint, error) {
 	if err != nil {
 		return 0, err
 	}
-	err = buf.write2Byte(uint16(d.qType))
+	err = buf.write2Byte(uint16(A))
 	if err != nil {
 		return 0, err
 	}
@@ -71,7 +71,7 @@ func (d *DnsRecord) write(buf *BytePacketBuffer) (uint, error) {
 	if err != nil {
 		return 0, err
 	}
-	err = buf.write2Byte(d.dataSize)
+	err = buf.write2Byte(4)
 	if err != nil {
 		return 0, err
 	}
