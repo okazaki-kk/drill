@@ -31,5 +31,7 @@ func (d *DnsQuestion) read(buf *BytePacketBuffer) error {
 	}
 	d.qtype = QueryType(qtype)
 
+	_, _ = buf.read2Byte() // class
+
 	return nil
 }

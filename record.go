@@ -2,7 +2,7 @@ package main
 
 type DnsRecord struct {
 	domain   string
-	qType    uint16
+	qType    QueryType
 	dataSize uint16
 	ttl      uint32
 }
@@ -23,7 +23,7 @@ func (d *DnsRecord) read(buf *BytePacketBuffer) error {
 	if err != nil {
 		return err
 	}
-	d.qType = qType
+	d.qType = QueryType(qType)
 
 	_, _ = buf.read2Byte() // class
 

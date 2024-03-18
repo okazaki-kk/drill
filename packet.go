@@ -21,7 +21,7 @@ func (d *DnsPacket) fromBuffer(buf *BytePacketBuffer) error {
 	}
 
 	for i := 0; i < int(d.header.questions); i++ {
-		var q DnsQuestion
+		q := DnsQuestion{}
 		err := q.read(buf)
 		if err != nil {
 			return err
@@ -30,7 +30,7 @@ func (d *DnsPacket) fromBuffer(buf *BytePacketBuffer) error {
 	}
 
 	for i := 0; i < int(d.header.answers); i++ {
-		var r DnsRecord
+		r := DnsRecord{}
 		err := r.read(buf)
 		if err != nil {
 			return err
@@ -39,7 +39,7 @@ func (d *DnsPacket) fromBuffer(buf *BytePacketBuffer) error {
 	}
 
 	for i := 0; i < int(d.header.authoritativeEntries); i++ {
-		var r DnsRecord
+		r := DnsRecord{}
 		err := r.read(buf)
 		if err != nil {
 			return err
@@ -48,7 +48,7 @@ func (d *DnsPacket) fromBuffer(buf *BytePacketBuffer) error {
 	}
 
 	for i := 0; i < int(d.header.resourceEntries); i++ {
-		var r DnsRecord
+		r := DnsRecord{}
 		err := r.read(buf)
 		if err != nil {
 			return err
