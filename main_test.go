@@ -6,7 +6,7 @@ import (
 )
 
 func TestQueryPacket(t *testing.T) {
-	f, err := os.Open("query_packet.bin")
+	f, err := os.Open("testdata/query_packet.bin")
 	if err != nil {
 		t.Fatalf("error opening file: %v", err)
 	}
@@ -56,7 +56,7 @@ func TestQueryPacket(t *testing.T) {
 }
 
 func TestResponsePacket(t *testing.T) {
-	f, err := os.Open("response_packet.bin")
+	f, err := os.Open("testdata/response_packet.bin")
 	if err != nil {
 		t.Fatalf("error opening file: %v", err)
 	}
