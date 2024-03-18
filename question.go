@@ -18,12 +18,20 @@ func NewDnsQuestion() *DnsQuestion {
 }
 
 // read reads a question from the buffer
-func (d *DnsQuestion) read(buf BytePacketBuffer) error {
-	var err error
-	name := d.name
-	d.name, err = buf.readQName(name)
+func (d *DnsQuestion) read(buf *BytePacketBuffer) error {
+	name, err := buf.readQName()
 	if err != nil {
 		return err
 	}
+	d.name = name
+
+	qtype, err := buf.read2Byte()
+	if err != nil {
+		return err
+	}
+	d.qtype = QueryType(qtype)
+
+	_, _ = buf.read2Byte() // class
+
 	return nil
 }
