@@ -1,10 +1,13 @@
 package main
 
+import (
+	"fmt"
+)
+
 type DnsRecord struct {
-	domain   string
-	qType    QueryType
-	dataSize uint16
-	ttl      uint32
+	domain string
+	ttl    uint32
+	addr   string
 }
 
 // NewDnsRecord creates a new DnsRecord
@@ -23,7 +26,9 @@ func (d *DnsRecord) read(buf *BytePacketBuffer) error {
 	if err != nil {
 		return err
 	}
-	d.qType = QueryType(qType)
+	if QueryType(qType) != A {
+		return fmt.Errorf("unsupported query type: %d", qType)
+	}
 
 	_, _ = buf.read2Byte() // class
 
@@ -33,11 +38,16 @@ func (d *DnsRecord) read(buf *BytePacketBuffer) error {
 	}
 	d.ttl = ttl
 
-	dataSize, err := buf.read2Byte()
+	_, err = buf.read2Byte()
 	if err != nil {
 		return err
 	}
-	d.dataSize = dataSize
+
+	rawAddr, err := buf.read4Byte()
+	if err != nil {
+		return err
+	}
+	d.addr = fmt.Sprintf("%d.%d.%d.%d", (rawAddr>>24)&0xFF, (rawAddr>>16)&0xFF, (rawAddr>>8)&0xFF, rawAddr&0xFF)
 
 	return nil
 }

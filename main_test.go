@@ -98,10 +98,9 @@ func TestResponsePacket(t *testing.T) {
 	}
 	expectedDnsRecords := []DnsRecord{
 		{
-			domain:   "google.com",
-			qType:    A,
-			ttl:      116,
-			dataSize: 4,
+			domain: "google.com",
+			addr:   "142.250.196.110",
+			ttl:    116,
 		},
 	}
 
