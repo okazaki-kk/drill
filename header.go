@@ -1,13 +1,23 @@
 package main
 
 type DnsHeader struct {
-	id int  // identification number
-	rd bool // recursion desired
-	tm bool // truncated message
-	ra bool // recursion available
+	id                  uint16 // identification number
+	recursionDesired    bool
+	truncatedMessage    bool
+	authoritativeAnswer bool
+	opcode              uint8 // purpose of the message
+	response            bool  // query/response
 
-	questions byte // 16 bits questions
-	answers   byte // 16 bits answers
+	resCode            ResultCode // response code
+	checkingDisabled   bool
+	authedData         bool
+	z                  bool
+	recursionAvailable bool
+
+	questions            uint16
+	answers              uint16
+	authoritativeEntries uint16
+	resourceEntries      uint16
 }
 
 // NewDnsHeader creates a new DnsHeader
@@ -15,18 +25,54 @@ func NewDnsHeader() *DnsHeader {
 	return &DnsHeader{}
 }
 
-func (d *DnsHeader) read(buf BytePacketBuffer) error {
-	bb, err := buf.read()
+func (d *DnsHeader) read(buf *BytePacketBuffer) error {
+	id, err := buf.read2Byte()
 	if err != nil {
 		return err
 	}
+	d.id = id
 
-	d.id = int(bb<<8) | int(bb)
-	flags := bb
-	d.rd = (flags & 0x1) == 1
-	d.tm = (flags & 0x2) == 1
-	d.ra = (flags & 0x80) == 1
-	d.questions = bb<<8 | bb
-	d.answers = bb<<8 | bb
+	flags, err := buf.read2Byte()
+	if err != nil {
+		return err
+	}
+	a := uint8(flags >> 8)
+	b := uint8(flags & 0xFF)
+	d.recursionDesired = (a & (1 << 0)) > 0
+	d.truncatedMessage = (a & (1 << 1)) > 0
+	d.authoritativeAnswer = (a & (1 << 2)) > 0
+	d.opcode = (a >> 3) & 0x0F
+	d.response = (a & (1 << 7)) > 0
+
+	d.resCode = ResultCode(b & 0x0F)
+	d.recursionAvailable = (b & (1 << 7)) > 0
+	d.checkingDisabled = (b & (1 << 4)) > 0
+	d.authedData = (b & (1 << 5)) > 0
+	d.z = (b & (1 << 6)) > 0
+
+	questions, err := buf.read2Byte()
+	if err != nil {
+		return err
+	}
+	d.questions = questions
+
+	answers, err := buf.read2Byte()
+	if err != nil {
+		return err
+	}
+	d.answers = answers
+
+	authoritativeEntries, err := buf.read2Byte()
+	if err != nil {
+		return err
+	}
+	d.authoritativeEntries = authoritativeEntries
+
+	resourceEntries, err := buf.read2Byte()
+	if err != nil {
+		return err
+	}
+	d.resourceEntries = resourceEntries
+
 	return nil
 }
