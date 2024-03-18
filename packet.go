@@ -1,7 +1,5 @@
 package main
 
-import "fmt"
-
 type DnsPacket struct {
 	header      DnsHeader
 	questions   []DnsQuestion
@@ -30,7 +28,6 @@ func (d *DnsPacket) fromBuffer(buf *BytePacketBuffer) error {
 		}
 		d.questions = append(d.questions, q)
 	}
-	fmt.Printf("question: %+v\n", d.questions[0])
 
 	for i := 0; i < int(d.header.answers); i++ {
 		var r DnsRecord
