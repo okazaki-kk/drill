@@ -5,6 +5,7 @@ import (
 	"net"
 	"os"
 	"testing"
+	"time"
 )
 
 func TestQueryPacket(t *testing.T) {
@@ -118,14 +119,11 @@ func TestResponsePacket(t *testing.T) {
 }
 
 func TestDNSServer(t *testing.T) {
-	qname := "google.com"
-	qtype := A
-
 	packet := NewDnsPacket()
 	packet.header.id = 1234
 	packet.header.questions = 1
 	packet.header.recursionDesired = true
-	packet.questions = append(packet.questions, DnsQuestion{name: qname, qtype: qtype})
+	packet.questions = append(packet.questions, DnsQuestion{name: "google.com", qtype: A})
 
 	requestBuf := NewBytePacketBuffer()
 	err := packet.write(requestBuf)
@@ -146,6 +144,8 @@ func TestDNSServer(t *testing.T) {
 	if err != nil {
 		log.Fatalf("error writing request: %v", err)
 	}
+
+	time.Sleep(3 * time.Second)
 
 	responseBuf := NewBytePacketBuffer()
 	_, _, err = conn.ReadFromUDP(responseBuf.buf)
