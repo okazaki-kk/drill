@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net"
 	"os"
 	"testing"
@@ -104,6 +105,8 @@ func TestResponsePacket(t *testing.T) {
 			ttl:    116,
 		},
 	}
+
+	fmt.Printf("packet: %+v\n", packet)
 
 	if packet.header != expectedDnsHeader {
 		t.Errorf("expected header %+v, got %+v", expectedDnsHeader, packet.header)
