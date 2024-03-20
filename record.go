@@ -26,7 +26,7 @@ func (d *DnsRecord) read(buf *BytePacketBuffer) error {
 	if err != nil {
 		return err
 	}
-	if QueryType(qType) != A {
+	if QueryType(qType) != UNKNOWN && QueryType(qType) != A && QueryType(qType) != NS && QueryType(qType) != CNAME && QueryType(qType) != MX && QueryType(qType) != AAAA {
 		return fmt.Errorf("unsupported query type: %d", qType)
 	}
 
