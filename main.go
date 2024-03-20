@@ -30,7 +30,7 @@ func main() {
 		log.Fatalf("error dialing: %v", err)
 	}
 	defer conn.Close()
-	_, err = conn.WriteToUDP(requestBuf.buf[0:requestBuf.pos], udpAddr)
+	_, err = conn.Write(requestBuf.buf[0:requestBuf.pos])
 	if err != nil {
 		log.Fatalf("error writing request: %v", err)
 	}
@@ -48,15 +48,15 @@ func main() {
 	}
 
 	for _, q := range resPacket.questions {
-		log.Printf("question: %s %v", q.name, q.qtype)
+		log.Printf("question: %+v", q)
 	}
 	for _, a := range resPacket.answers {
-		log.Printf("%s: %s", a.domain, a.addr)
+		log.Printf("answer: %+v", a)
 	}
 	for _, a := range resPacket.authorities {
-		log.Printf("%s: %s", a.domain, a.addr)
+		log.Printf("authority: %+v", a)
 	}
 	for _, a := range resPacket.resources {
-		log.Printf("%s: %s", a.domain, a.addr)
+		log.Printf("resource: %+v", a)
 	}
 }
