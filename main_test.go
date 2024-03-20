@@ -106,8 +106,6 @@ func TestResponsePacket(t *testing.T) {
 		},
 	}
 
-	fmt.Printf("packet: %+v\n", packet)
-
 	if packet.header != expectedDnsHeader {
 		t.Errorf("expected header %+v, got %+v", expectedDnsHeader, packet.header)
 	}
@@ -167,6 +165,8 @@ func TestDNSServer(t *testing.T) {
 	if err != nil {
 		t.Errorf("error reading response: %v", err)
 	}
+
+	fmt.Printf("%+v\n", resPacket)
 
 	expectedDnsQuestions := []DnsQuestion{{name: "google.com", qtype: A}}
 	expectedDnsAnswersDomain := "google.com"
