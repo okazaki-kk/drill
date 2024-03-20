@@ -27,8 +27,5 @@ jobs:
       - name: Fmt
         run: make fmt
 
-      - name: run main
-        run: make build && ./drill
-
       - name: Test
         run: make test

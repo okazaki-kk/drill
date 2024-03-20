@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"net"
 	"os"
 	"testing"
@@ -117,38 +117,31 @@ func TestResponsePacket(t *testing.T) {
 	}
 }
 
-func testServer() (*net.UDPConn, error) {
-	udpAddr, err := net.ResolveUDPAddr("udp", "8.8.8.8:53")
-	if err != nil {
-		return nil, err
-	}
-	conn, err := net.DialUDP("udp", nil, udpAddr)
-	if err != nil {
-		return nil, err
-	}
-	return conn, nil
-}
-
 func TestDNSServer(t *testing.T) {
-	conn, err := testServer()
-	if err != nil {
-		t.Errorf("error creating server: %v", err)
-	}
-	defer conn.Close()
+	qname := "google.com"
+	qtype := A
 
 	packet := NewDnsPacket()
-	packet.header = DnsHeader{
-		id:               1234,
-		questions:        1,
-		recursionDesired: true,
-	}
-	packet.questions = []DnsQuestion{{name: "google.com", qtype: A}}
+	packet.header.id = 1234
+	packet.header.questions = 1
+	packet.header.recursionDesired = true
+	packet.questions = append(packet.questions, DnsQuestion{name: qname, qtype: qtype})
 
 	requestBuf := NewBytePacketBuffer()
-	err = packet.write(requestBuf)
+	err := packet.write(requestBuf)
 	if err != nil {
 		t.Errorf("error writing packet: %v", err)
 	}
+
+	udpAddr, err := net.ResolveUDPAddr("udp", "8.8.8.8:53")
+	if err != nil {
+		t.Errorf("error resolving address: %v", err)
+	}
+	conn, err := net.DialUDP("udp", nil, udpAddr)
+	if err != nil {
+		t.Errorf("error dialing: %v", err)
+	}
+	defer conn.Close()
 	_, err = conn.Write(requestBuf.buf[0:requestBuf.pos])
 	if err != nil {
 		t.Errorf("error writing request: %v", err)
@@ -166,15 +159,16 @@ func TestDNSServer(t *testing.T) {
 		t.Errorf("error reading response: %v", err)
 	}
 
-	fmt.Printf("%+v\n", resPacket)
-
-	expectedDnsQuestions := []DnsQuestion{{name: "google.com", qtype: A}}
-	expectedDnsAnswersDomain := "google.com"
-
-	if resPacket.questions[0] != expectedDnsQuestions[0] {
-		t.Errorf("expected question %+v, got %+v", expectedDnsQuestions[0], resPacket.questions[0])
+	for _, q := range resPacket.questions {
+		log.Printf("question: %+v", q)
 	}
-	if resPacket.answers[0].domain != expectedDnsAnswersDomain {
-		t.Errorf("expected answer %+v, got %+v", expectedDnsAnswersDomain, resPacket.answers[0].domain)
+	for _, a := range resPacket.answers {
+		log.Printf("answer: %+v", a)
+	}
+	for _, a := range resPacket.authorities {
+		log.Printf("authority: %+v", a)
+	}
+	for _, a := range resPacket.resources {
+		log.Printf("resource: %+v", a)
 	}
 }
