@@ -58,3 +58,40 @@ func (d *DnsPacket) fromBuffer(buf *BytePacketBuffer) error {
 
 	return nil
 }
+
+func (d *DnsPacket) write(buf *BytePacketBuffer) error {
+	err := d.header.write(buf)
+	if err != nil {
+		return err
+	}
+
+	for _, q := range d.questions {
+		err := q.write(buf)
+		if err != nil {
+			return err
+		}
+	}
+
+	for _, a := range d.answers {
+		_, err := a.write(buf)
+		if err != nil {
+			return err
+		}
+	}
+
+	for _, a := range d.authorities {
+		_, err := a.write(buf)
+		if err != nil {
+			return err
+		}
+	}
+
+	for _, a := range d.resources {
+		_, err := a.write(buf)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}

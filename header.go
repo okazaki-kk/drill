@@ -76,3 +76,64 @@ func (d *DnsHeader) read(buf *BytePacketBuffer) error {
 
 	return nil
 }
+
+func (d *DnsHeader) write(buf *BytePacketBuffer) error {
+	err := buf.write2Byte(d.id)
+	if err != nil {
+		return err
+	}
+
+	flags := uint16(0)
+	if d.recursionDesired {
+		flags |= (1 << 0)
+	}
+	if d.truncatedMessage {
+		flags |= (1 << 1)
+	}
+	if d.authoritativeAnswer {
+		flags |= (1 << 2)
+	}
+	flags |= (uint16(d.opcode) << 3)
+	if d.response {
+		flags |= (1 << 7)
+	}
+	flags |= uint16(d.resCode)
+	if d.recursionAvailable {
+		flags |= (1 << 7)
+	}
+	if d.checkingDisabled {
+		flags |= (1 << 4)
+	}
+	if d.authedData {
+		flags |= (1 << 5)
+	}
+	if d.z {
+		flags |= (1 << 6)
+	}
+	err = buf.write2Byte(flags)
+	if err != nil {
+		return err
+	}
+
+	err = buf.write2Byte(d.questions)
+	if err != nil {
+		return err
+	}
+
+	err = buf.write2Byte(d.answers)
+	if err != nil {
+		return err
+	}
+
+	err = buf.write2Byte(d.authoritativeEntries)
+	if err != nil {
+		return err
+	}
+
+	err = buf.write2Byte(d.resourceEntries)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
