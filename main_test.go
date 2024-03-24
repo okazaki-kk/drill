@@ -129,8 +129,8 @@ func TestResponsePacket(t *testing.T) {
 			expectedDnsRecords: []DnsRecord{
 				{
 					domain: "www.yahoo.com",
-					host: "me-ycpi-cf-www.g06.yahoodns.net",
-					ttl:  60,
+					host:   "me-ycpi-cf-www.g06.yahoodns.net",
+					ttl:    60,
 				},
 				{
 					domain: "me-ycpi-cf-www.g06.yahoodns.net",
