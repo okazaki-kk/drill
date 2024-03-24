@@ -5,6 +5,7 @@ import (
 )
 
 type DnsRecord struct {
+	qType  QueryType
 	domain string
 	ttl    uint32
 	addr   string
@@ -50,12 +51,14 @@ func (d *DnsRecord) read(buf *BytePacketBuffer) error {
 			return err
 		}
 		d.addr = fmt.Sprintf("%d.%d.%d.%d", (rawAddr>>24)&0xFF, (rawAddr>>16)&0xFF, (rawAddr>>8)&0xFF, rawAddr&0xFF)
+		d.qType = A
 	} else if QueryType(qType) == CNAME {
 		host, err := buf.readQName()
 		if err != nil {
 			return err
 		}
 		d.host = host
+		d.qType = CNAME
 	}
 
 	return nil
