@@ -5,11 +5,12 @@ import (
 )
 
 type DnsRecord struct {
-	qType  QueryType
-	domain string
-	ttl    uint32
-	addr   string
-	host   string
+	qType    QueryType
+	domain   string
+	ttl      uint32
+	addr     string
+	host     string
+	priority uint16
 }
 
 // NewDnsRecord creates a new DnsRecord
@@ -59,6 +60,46 @@ func (d *DnsRecord) read(buf *BytePacketBuffer) error {
 		}
 		d.host = host
 		d.qType = CNAME
+	} else if QueryType(qType) == NS {
+		host, err := buf.readQName()
+		if err != nil {
+			return err
+		}
+		d.host = host
+		d.qType = NS
+	} else if QueryType(qType) == MX {
+		priority, err := buf.read2Byte()
+		if err != nil {
+			return err
+		}
+		host, err := buf.readQName()
+		if err != nil {
+			return err
+		}
+
+		d.priority = priority
+		d.host = host
+		d.qType = MX
+	} else if QueryType(qType) == AAAA {
+		addr1, err := buf.read4Byte()
+		if err != nil {
+			return err
+		}
+		addr2, err := buf.read4Byte()
+		if err != nil {
+			return err
+		}
+		addr3, err := buf.read4Byte()
+		if err != nil {
+			return err
+		}
+		addr4, err := buf.read4Byte()
+		if err != nil {
+			return err
+		}
+		addr := fmt.Sprintf("%x:%x:%x:%x:%x:%x:%x:%x", (addr1>>16)&0xFFFF, addr1&0xFFFF, (addr2>>16)&0xFFFF, addr2&0xFFFF, (addr3>>16)&0xFFFF, addr3&0xFFFF, (addr4>>16)&0xFFFF, addr4&0xFFFF)
+		d.addr = addr
+		d.qType = AAAA
 	}
 
 	return nil
