@@ -29,8 +29,8 @@ func (d *DnsRecord) read(buf *BytePacketBuffer) error {
 	if err != nil {
 		return err
 	}
-	if QueryType(qType) != UNKNOWN && QueryType(qType) != A && QueryType(qType) != NS && QueryType(qType) != CNAME && QueryType(qType) != MX && QueryType(qType) != AAAA {
-		return fmt.Errorf("unsupported query type: %d", qType)
+	if QueryType(qType) != A && QueryType(qType) != NS && QueryType(qType) != CNAME && QueryType(qType) != MX && QueryType(qType) != AAAA {
+		qType = uint16(UNKNOWN)
 	}
 
 	_, _ = buf.read2Byte() // class
@@ -41,7 +41,7 @@ func (d *DnsRecord) read(buf *BytePacketBuffer) error {
 	}
 	d.ttl = ttl
 
-	_, err = buf.read2Byte()
+	dataLen, err := buf.read2Byte()
 	if err != nil {
 		return err
 	}
@@ -100,6 +100,8 @@ func (d *DnsRecord) read(buf *BytePacketBuffer) error {
 		addr := fmt.Sprintf("%x:%x:%x:%x:%x:%x:%x:%x", (addr1>>16)&0xFFFF, addr1&0xFFFF, (addr2>>16)&0xFFFF, addr2&0xFFFF, (addr3>>16)&0xFFFF, addr3&0xFFFF, (addr4>>16)&0xFFFF, addr4&0xFFFF)
 		d.addr = addr
 		d.qType = AAAA
+	} else if QueryType(qType) == UNKNOWN {
+		buf.pos += uint(dataLen)
 	}
 
 	return nil

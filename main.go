@@ -1,62 +1,106 @@
 package main
 
 import (
-	"log"
+	"fmt"
 	"net"
+	"os"
 )
 
-func main() {
-	qname := "google.com"
-	qtype := A
-
-	packet := NewDnsPacket()
-	packet.header.id = 1234
-	packet.header.questions = 1
-	packet.header.recursionDesired = true
-	packet.questions = append(packet.questions, DnsQuestion{name: qname, qtype: qtype})
-
-	requestBuf := NewBytePacketBuffer()
-	err := packet.write(requestBuf)
-	if err != nil {
-		log.Fatalf("error writing packet: %v", err)
-	}
-
+func lookup(domain string, qtype QueryType) (*DnsPacket, error) {
 	udpAddr, err := net.ResolveUDPAddr("udp", "8.8.8.8:53")
 	if err != nil {
-		log.Fatalf("error resolving address: %v", err)
+		return nil, err
 	}
 	conn, err := net.DialUDP("udp", nil, udpAddr)
 	if err != nil {
-		log.Fatalf("error dialing: %v", err)
+		return nil, err
 	}
 	defer conn.Close()
+
+	packet := NewDnsPacket()
+	packet.header = DnsHeader{id: 6666, questions: 1, recursionDesired: true}
+	packet.questions = []DnsQuestion{{name: domain, qtype: qtype}}
+
+	requestBuf := NewBytePacketBuffer()
+	packet.write(requestBuf)
 	_, err = conn.Write(requestBuf.buf[0:requestBuf.pos])
 	if err != nil {
-		log.Fatalf("error writing request: %v", err)
+		return nil, err
 	}
 
 	responseBuf := NewBytePacketBuffer()
 	_, _, err = conn.ReadFromUDP(responseBuf.buf)
 	if err != nil {
-		log.Fatalf("error reading response: %v", err)
+		return nil, err
 	}
 
 	resPacket := NewDnsPacket()
 	err = resPacket.fromBuffer(responseBuf)
 	if err != nil {
-		log.Fatalf("error reading response: %v", err)
+		return nil, err
 	}
 
-	for _, q := range resPacket.questions {
-		log.Printf("question: %+v", q)
+	return resPacket, nil
+}
+
+func handleQuery(conn *net.UDPConn) error {
+	requestBuf := NewBytePacketBuffer()
+	_, addr, err := conn.ReadFromUDP(requestBuf.buf)
+	if err != nil {
+		return err
 	}
-	for _, a := range resPacket.answers {
-		log.Printf("answer: %+v", a)
+
+	request := NewDnsPacket()
+	err = request.fromBuffer(requestBuf)
+	if err != nil {
+		return err
 	}
-	for _, a := range resPacket.authorities {
-		log.Printf("authority: %+v", a)
+
+	packet := NewDnsPacket()
+	packet.header = DnsHeader{id: request.header.id, recursionDesired: true, recursionAvailable: true, response: true}
+	packet.questions = append(packet.questions, request.questions...)
+
+	question := request.questions[0]
+	result, err := lookup(question.name, question.qtype)
+	if err != nil {
+		return err
 	}
-	for _, a := range resPacket.resources {
-		log.Printf("resource: %+v", a)
+	packet.header.resCode = result.header.resCode
+
+	packet.answers = append(packet.answers, result.answers...)
+	packet.authorities = append(packet.authorities, result.authorities...)
+	packet.resources = append(packet.resources, result.resources...)
+
+	resBuffer := NewBytePacketBuffer()
+	err = packet.write(resBuffer)
+	if err != nil {
+		return err
+	}
+
+	_, err = conn.WriteTo(resBuffer.buf[0:resBuffer.pos], addr)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func main() {
+	udpAddr, err := net.ResolveUDPAddr("udp", "0.0.0.0:2054")
+	if err != nil {
+		fmt.Printf("error resolving address: %v", err)
+		os.Exit(1)
+	}
+	conn, err := net.ListenUDP("udp", udpAddr)
+	if err != nil {
+		fmt.Printf("error listening: %v", err)
+		os.Exit(1)
+	}
+	defer conn.Close()
+
+	for {
+		err := handleQuery(conn)
+		if err != nil {
+			fmt.Printf("error handling query: %v\n", err)
+		}
 	}
 }
