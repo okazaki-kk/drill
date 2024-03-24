@@ -128,13 +128,18 @@ func TestResponsePacket(t *testing.T) {
 			},
 			expectedDnsRecords: []DnsRecord{
 				{
-					domain: "me-ycpi-cf-www.g06.yahoodns.net",
-					addr:   "180.222.119.248",
-					ttl:    30,
+					domain: "www.yahoo.com",
+					host: "me-ycpi-cf-www.g06.yahoodns.net",
+					ttl:  60,
 				},
 				{
 					domain: "me-ycpi-cf-www.g06.yahoodns.net",
 					addr:   "180.222.119.247",
+					ttl:    30,
+				},
+				{
+					domain: "me-ycpi-cf-www.g06.yahoodns.net",
+					addr:   "180.222.119.248",
 					ttl:    30,
 				},
 			},

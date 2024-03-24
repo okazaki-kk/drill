@@ -8,6 +8,7 @@ type DnsRecord struct {
 	domain string
 	ttl    uint32
 	addr   string
+	host string
 }
 
 // NewDnsRecord creates a new DnsRecord
@@ -43,11 +44,19 @@ func (d *DnsRecord) read(buf *BytePacketBuffer) error {
 		return err
 	}
 
-	rawAddr, err := buf.read4Byte()
-	if err != nil {
-		return err
+	if QueryType(qType) == A {
+		rawAddr, err := buf.read4Byte()
+		if err != nil {
+			return err
+		}
+		d.addr = fmt.Sprintf("%d.%d.%d.%d", (rawAddr>>24)&0xFF, (rawAddr>>16)&0xFF, (rawAddr>>8)&0xFF, rawAddr&0xFF)
+	} else if QueryType(qType) == CNAME {
+		host, err := buf.readQName()
+		if err != nil {
+			return err
+		}
+		d.host = host
 	}
-	d.addr = fmt.Sprintf("%d.%d.%d.%d", (rawAddr>>24)&0xFF, (rawAddr>>16)&0xFF, (rawAddr>>8)&0xFF, rawAddr&0xFF)
 
 	return nil
 }
