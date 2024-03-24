@@ -261,10 +261,10 @@ func TestResponsePacket(t *testing.T) {
 			},
 			expectedDnsRecords: []DnsRecord{
 				{
-					domain: "google.com",
-					host:   "smtp.google.com",
-					ttl:    210,
-					qType:  MX,
+					domain:   "google.com",
+					host:     "smtp.google.com",
+					ttl:      210,
+					qType:    MX,
 					priority: 10,
 				},
 			},
@@ -298,7 +298,7 @@ func TestResponsePacket(t *testing.T) {
 			expectedDnsRecords: []DnsRecord{
 				{
 					domain: "google.com",
-					addr: "2404:6800:4004:824:0:0:0:200e",
+					addr:   "2404:6800:4004:824:0:0:0:200e",
 					ttl:    26,
 					qType:  AAAA,
 				},
