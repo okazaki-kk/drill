@@ -60,6 +60,11 @@ func (d *DnsPacket) fromBuffer(buf *BytePacketBuffer) error {
 }
 
 func (d *DnsPacket) write(buf *BytePacketBuffer) error {
+	d.header.questions = uint16(len(d.questions))
+	d.header.answers = uint16(len(d.answers))
+	d.header.authoritativeEntries = uint16(len(d.authorities))
+	d.header.resourceEntries = uint16(len(d.resources))
+
 	err := d.header.write(buf)
 	if err != nil {
 		return err

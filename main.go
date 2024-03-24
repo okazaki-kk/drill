@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net"
 )
@@ -109,7 +108,7 @@ func main() {
 		// Handle incoming queries in a loop
 		err := handleQuery(conn)
 		if err != nil {
-			fmt.Printf("error handling query: %v\n", err)
+			log.Printf("error handling query: %v\n", err)
 		}
 	}
 }
