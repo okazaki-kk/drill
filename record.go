@@ -8,7 +8,7 @@ type DnsRecord struct {
 	domain string
 	ttl    uint32
 	addr   string
-	host string
+	host   string
 }
 
 // NewDnsRecord creates a new DnsRecord
