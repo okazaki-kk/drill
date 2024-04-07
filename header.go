@@ -83,34 +83,14 @@ func (d *DnsHeader) write(buf *BytePacketBuffer) error {
 		return err
 	}
 
-	flags := uint16(0)
-	if d.recursionDesired {
-		flags |= (1 << 0)
+	flags := b2i(d.recursionDesired) | (b2i(d.truncatedMessage) << 1) | (b2i(d.authoritativeAnswer) << 2) | (d.opcode << 3) | (b2i(d.response) << 7)
+	err = buf.write(flags)
+	if err != nil {
+		return err
 	}
-	if d.truncatedMessage {
-		flags |= (1 << 1)
-	}
-	if d.authoritativeAnswer {
-		flags |= (1 << 2)
-	}
-	flags |= (uint16(d.opcode) << 3)
-	if d.response {
-		flags |= (1 << 7)
-	}
-	flags |= uint16(d.resCode)
-	if d.recursionAvailable {
-		flags |= (1 << 7)
-	}
-	if d.checkingDisabled {
-		flags |= (1 << 4)
-	}
-	if d.authedData {
-		flags |= (1 << 5)
-	}
-	if d.z {
-		flags |= (1 << 6)
-	}
-	err = buf.write2Byte(flags)
+
+	flags = (uint8(d.resCode)) | (b2i(d.checkingDisabled) << 4) | (b2i(d.authedData) << 5) | (b2i(d.z) << 6) | (b2i(d.recursionAvailable) >> 7)
+	err = buf.write(flags)
 	if err != nil {
 		return err
 	}
@@ -136,4 +116,11 @@ func (d *DnsHeader) write(buf *BytePacketBuffer) error {
 	}
 
 	return nil
+}
+
+func b2i(b bool) uint8 {
+	if b {
+		return 1
+	}
+	return 0
 }

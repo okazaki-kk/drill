@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net"
 )
 
 type DnsRecord struct {
@@ -118,18 +119,19 @@ func (d *DnsRecord) write(buf *BytePacketBuffer) (uint, error) {
 	if err != nil {
 		return 0, err
 	}
-	err = buf.write2Byte(1) // class
-	if err != nil {
-		return 0, nil
-	}
+	buf.write2Byte(1) // class
 	err = buf.write4Byte(d.ttl)
 	if err != nil {
 		return 0, err
 	}
-	err = buf.write2Byte(4)
-	if err != nil {
-		return 0, err
-	}
+	buf.write2Byte(4)
+
+	ip := net.ParseIP(d.addr)
+	ipv4 := ip.To4()
+	buf.write(ipv4[0])
+	buf.write(ipv4[1])
+	buf.write(ipv4[2])
+	buf.write(ipv4[3])
 
 	return buf.position() - start, nil
 }
