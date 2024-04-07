@@ -171,12 +171,12 @@ func (b *BytePacketBuffer) writeQName(qname string) error {
 	labels := strings.Split(qname, ".")
 	for _, label := range labels {
 		len := uint8(len(label))
-		if len > 0x3f {
+		if len > 0x34 {
 			return errors.New("label too long")
 		}
 
 		b.write(len)
-		for _, c := range label {
+		for _, c := range []byte(label) {
 			b.write(uint8(c))
 		}
 	}
