@@ -120,7 +120,7 @@ func (d *DnsHeader) write(buf *BytePacketBuffer) error {
 
 func b2i(b bool) uint8 {
 	if b {
-			return 1
+		return 1
 	}
 	return 0
 }
