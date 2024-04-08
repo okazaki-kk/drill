@@ -34,7 +34,7 @@ func (d *DnsRecord) read(buf *BytePacketBuffer) error {
 		qType = uint16(UNKNOWN)
 	}
 
-	_, _ = buf.read2Byte() // class
+	buf.read2Byte() // class
 
 	ttl, err := buf.read4Byte()
 	if err != nil {
@@ -108,21 +108,19 @@ func (d *DnsRecord) read(buf *BytePacketBuffer) error {
 	return nil
 }
 
-func (d *DnsRecord) write(buf *BytePacketBuffer) (uint, error) {
-	start := buf.position()
-
-	err := buf.writeQName(d.domain)
-	if err != nil {
-		return 0, err
+func (d *DnsRecord) write(buf *BytePacketBuffer) error {
+	// write domain to buffer
+	if err := buf.writeQName(d.domain); err != nil {
+		return err
 	}
-	err = buf.write2Byte(uint16(A))
-	if err != nil {
-		return 0, err
+	// write resource type to buffer
+	if err := buf.write2Byte(uint16(A)); err != nil {
+		return err
 	}
 	buf.write2Byte(1) // class
-	err = buf.write4Byte(d.ttl)
-	if err != nil {
-		return 0, err
+	// write ttl to buffer
+	if err := buf.write4Byte(d.ttl); err != nil {
+		return err
 	}
 	buf.write2Byte(4)
 
@@ -133,5 +131,5 @@ func (d *DnsRecord) write(buf *BytePacketBuffer) (uint, error) {
 	buf.write(ipv4[2])
 	buf.write(ipv4[3])
 
-	return buf.position() - start, nil
+	return nil
 }
