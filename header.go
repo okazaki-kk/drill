@@ -78,40 +78,33 @@ func (d *DnsHeader) read(buf *BytePacketBuffer) error {
 }
 
 func (d *DnsHeader) write(buf *BytePacketBuffer) error {
-	err := buf.write2Byte(d.id)
-	if err != nil {
+	if err := buf.write2Byte(d.id); err != nil {
 		return err
 	}
 
 	flags := b2i(d.recursionDesired) | (b2i(d.truncatedMessage) << 1) | (b2i(d.authoritativeAnswer) << 2) | (d.opcode << 3) | (b2i(d.response) << 7)
-	err = buf.write(flags)
-	if err != nil {
+	if err := buf.write(flags); err != nil {
 		return err
 	}
 
 	flags = (uint8(d.resCode)) | (b2i(d.checkingDisabled) << 4) | (b2i(d.authedData) << 5) | (b2i(d.z) << 6) | (b2i(d.recursionAvailable) >> 7)
-	err = buf.write(flags)
-	if err != nil {
+	if err := buf.write(flags); err != nil {
 		return err
 	}
 
-	err = buf.write2Byte(d.questions)
-	if err != nil {
+	if err := buf.write2Byte(d.questions); err != nil {
 		return err
 	}
 
-	err = buf.write2Byte(d.answers)
-	if err != nil {
+	if err := buf.write2Byte(d.answers); err != nil {
 		return err
 	}
 
-	err = buf.write2Byte(d.authoritativeEntries)
-	if err != nil {
+	if err := buf.write2Byte(d.authoritativeEntries); err != nil {
 		return err
 	}
 
-	err = buf.write2Byte(d.resourceEntries)
-	if err != nil {
+	if err := buf.write2Byte(d.resourceEntries); err != nil {
 		return err
 	}
 

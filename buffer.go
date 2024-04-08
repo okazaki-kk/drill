@@ -151,8 +151,7 @@ func (b *BytePacketBuffer) write(val uint8) error {
 
 // write2Byte writes two bytes to the buffer
 func (b *BytePacketBuffer) write2Byte(val uint16) error {
-	err := b.write(uint8(val >> 8))
-	if err != nil {
+	if err := b.write(uint8(val >> 8)); err != nil {
 		return err
 	}
 	return b.write(uint8(val))
@@ -160,8 +159,7 @@ func (b *BytePacketBuffer) write2Byte(val uint16) error {
 
 // write4Byte writes four bytes to the buffer
 func (b *BytePacketBuffer) write4Byte(val uint32) error {
-	err := b.write2Byte(uint16(val >> 16))
-	if err != nil {
+	if err := b.write2Byte(uint16(val >> 16)); err != nil {
 		return err
 	}
 	return b.write2Byte(uint16(val))
