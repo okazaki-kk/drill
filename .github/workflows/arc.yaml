@@ -7,5 +7,18 @@ jobs:
     # You need to use the INSTALLATION_NAME from the previous step
     runs-on: gha-runner-scale-set
     steps:
-    - run: lscpu | grep -E 'Socket|Core|Thread|CPU'
-    - run: echo "🎉 This job uses runner scale set runners!"
+      - run: lscpu | grep -E 'Socket|Core|Thread|CPU'
+      # 1. リポジトリのチェックアウト
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Ruby環境をセットアップ
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.2 # 使用するRubyのバージョンを指定
+
+      # 4. Rubyスクリプトの実行
+      - name: Run the Ruby script
+        run: |
+          ruby script.rb
