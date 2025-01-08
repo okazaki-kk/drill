@@ -16,7 +16,7 @@ is_prime() {
 
 # 指定範囲で素数を計算
 start_range=1
-end_range=50000
+end_range=80000
 prime_count=0
 
 echo "Finding primes between $start_range and $end_range..."
