@@ -12,13 +12,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Ruby環境をセットアップ
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 3.2 # 使用するRubyのバージョンを指定
-
       # 4. Rubyスクリプトの実行
-      - name: Run the Ruby script
+      - name: Run the Shell script
         run: |
-          ruby script.rb
+          ./script.sh
